@@ -13,7 +13,7 @@
 - **Python Files**: 20
 - **Documentation**: 5  
 - **Configuration**: 4
-- **Docker/Deployment**: 8
+- **Deployment Scripts**: 6
 
 ---
 
@@ -92,18 +92,17 @@ IMPLEMENTATION_SUMMARY.md             (350 lines) This implementation summary
 
 ---
 
-### 🐳 Docker & Deployment Files (8 files)
+### � Deployment & Automation Files (8 files)
 
 ```
-Dockerfile                            (35 lines) Standard CPU/GPU Docker image
-Dockerfile.advanced                   (50 lines) Advanced multi-stage build with GPU
-docker-compose.yml                    (60 lines) Docker Compose orchestration
-.dockerignore                         (35 lines) Docker ignore patterns
-start.sh                              (20 lines) Linux startup script
-start.bat                             (20 lines) Windows startup script
-cleanup.sh                            (15 lines) Linux cleanup script
-cleanup.bat                           (15 lines) Windows cleanup script
-Makefile                              (60 lines) Make commands for project management
+setup.sh                              (40 lines) Linux/macOS venv setup script
+setup.bat                             (60 lines) Windows venv setup script
+start.sh                              (25 lines) Linux/macOS quick start script
+start.bat                             (25 lines) Windows quick start script
+cleanup.sh                            (25 lines) Linux/macOS cleanup script
+cleanup.bat                           (25 lines) Windows cleanup script
+Makefile                              (70 lines) Make commands for project management
+.env.example                          (35 lines) Environment variables template
 ```
 
 ---
@@ -217,16 +216,16 @@ ai_video_detection/                  (Root directory)
 │   ├── __init__.py
 │   └── test_detection.py            (80 lines)
 │
-├── 🐳 Docker Configuration (8 files)
-│   ├── Dockerfile
-│   ├── Dockerfile.advanced
-│   ├── docker-compose.yml
-│   ├── .dockerignore
+├── � Deployment Scripts (9 files)
+│   ├── setup.sh
+│   ├── setup.bat
 │   ├── start.sh
 │   ├── start.bat
 │   ├── cleanup.sh
 │   ├── cleanup.bat
-│   └── Makefile
+│   ├── Makefile
+│   ├── requirements.txt
+│   └── .env.example
 │
 ├── ⚙️ Configuration Files (4 files)
 │   ├── requirements.txt
@@ -329,11 +328,12 @@ result = engine.process_video(video_source=0, max_frames=100)
 engine.shutdown()
 ```
 
-### Docker Usage
+### Virtual Environment Usage
 ```bash
-docker build -t ai-video-detection:latest .
-docker-compose up -d
-docker-compose exec video-detection python -m app.main
+# Setup and run
+bash setup.sh
+source venv/bin/activate
+python -m app.main
 ```
 
 ### REST API Usage
@@ -345,7 +345,7 @@ curl http://localhost:8000/summary
 
 ### Make Commands
 ```bash
-make build
+make setup
 make run
 make test
 make clean
@@ -357,7 +357,7 @@ make clean
 
 - ✅ 20 Python files (1,500+ lines of application code)
 - ✅ 5 Documentation files (1,500+ lines)
-- ✅ 8 Docker/deployment files
+- ✅ 6 Deployment/script files
 - ✅ 4 Configuration files
 - ✅ Full object detection pipeline
 - ✅ REST API with 7 endpoints
@@ -369,7 +369,7 @@ make clean
 - ✅ Helper scripts
 - ✅ Startup/cleanup scripts
 - ✅ Make automation
-- ✅ Docker support (CPU & GPU)
+- ✅ CPU & GPU support
 - ✅ Environment configuration
 
 ---
@@ -383,7 +383,7 @@ The system is **production-ready** with:
 - ✅ Performance optimization
 - ✅ Logging & monitoring
 - ✅ API documentation
-- ✅ Docker containerization
+- ✅ Virtual environment isolation
 - ✅ Configuration management
 
 ---

@@ -14,43 +14,45 @@ VIDEOS_DIR = DATA_DIR / 'videos'
 
 # Create directories if they don't exist
 LOGS_DIR.mkdir(exist_ok=True)
+(LOGS_DIR / 'predictions').mkdir(exist_ok=True)
 MODELS_DIR.mkdir(exist_ok=True)
 VIDEOS_DIR.mkdir(exist_ok=True)
 
 # Model Configuration
 MODEL_CONFIG = {
-    'model_name': 'yolov8m',  # YOLOv8 medium model
+    'model_name': 'yolov8m',
     'model_path': str(MODELS_DIR / 'yolov8m.pt'),
-    'confidence_threshold': 0.45,
+    'confidence_threshold': 0.50, # Slightly higher to reduce "Truck" false positives
     'iou_threshold': 0.50,
     'max_detections': 100,
 }
 
 # Video Processing Configuration
 VIDEO_CONFIG = {
-    'input_source': 0,  # 0 for webcam, or path to video file
+    # CHANGE THIS: Use a local path, a direct URL, or a device index (0 for webcam)
+    'input_source': 0,
     'frame_rate': 30,
     'frame_width': 1280,
     'frame_height': 720,
     'buffer_size': 30,
-    'skip_frames': 1,  # Process every nth frame
+    'skip_frames': 2, # Skip every other frame to help CPU keep up with web streams
 }
 
 # Detection Configuration
 DETECTION_CONFIG = {
-    'classes': None,  # None for all classes, or list of specific class IDs
+    'classes': None, # None for all, or e.g., [0] for only people
     'agnostic_nms': False,
-    'max_time_threshold': 5.0,  # Max processing time per frame
+    'max_time_threshold': 5.0,
 }
 
 # Output Configuration
 OUTPUT_CONFIG = {
     'save_results': True,
-    'output_format': 'json',  # json, csv, or both
+    'output_format': 'json',
     'annotate_frames': True,
     'output_directory': str(LOGS_DIR / 'predictions'),
-    'video_output': False,
-    'video_output_path': str(LOGS_DIR / 'output_video.mp4'),
+    'video_output': True, # ENABLED
+    'video_output_path': str(LOGS_DIR / 'predictions' / 'output_result.avi'), # Saved as .avi for XVID
 }
 
 # Logging Configuration
@@ -58,29 +60,14 @@ LOGGING_CONFIG = {
     'level': 'INFO',
     'format': '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     'log_file': str(LOGS_DIR / 'app.log'),
-    'max_bytes': 10485760,  # 10MB
+    'max_bytes': 10485760,
     'backup_count': 5,
-}
-
-# Database Configuration (optional)
-DATABASE_CONFIG = {
-    'enabled': False,
-    'type': 'sqlite',  # sqlite, postgresql, mysql
-    'path': str(DATA_DIR / 'detections.db'),
 }
 
 # Performance Configuration
 PERFORMANCE_CONFIG = {
-    'device': 'cuda',  # cuda, cpu, or mps (Apple Silicon)
+    'device': 'cpu', # Use 'cuda' if you have an NVIDIA GPU with CUDA PyTorch installed
     'batch_size': 1,
-    'half_precision': False,  # Use FP16
+    'half_precision': False,
     'workers': 4,
-}
-
-# Streaming Configuration
-STREAMING_CONFIG = {
-    'enabled': False,
-    'stream_url': 'rtsp://example.com/stream',  # RTSP URL
-    'reconnect_attempts': 5,
-    'reconnect_delay': 5,
 }

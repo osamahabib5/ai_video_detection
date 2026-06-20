@@ -1,6 +1,6 @@
 # AI Video Detection System
 
-Real-time object detection system for video feeds using YOLOv8 and Docker.
+Real-time object detection system for video feeds using YOLOv8.
 
 ## Overview
 
@@ -9,7 +9,7 @@ This is a production-ready ML system that:
 - **Detects objects** using YOLOv8 neural network
 - **Generates predictions** with bounding boxes and confidence scores
 - **Saves results** in JSON/CSV format
-- **Runs in Docker** for easy deployment
+- **Runs in a Python virtual environment** for easy deployment
 
 ## Project Structure
 
@@ -39,11 +39,10 @@ ai_video_detection/
 ├── logs/
 │   └── predictions/           # Output predictions
 ├── tests/                      # Unit tests
-├── Dockerfile                  # Standard Dockerfile
-├── Dockerfile.advanced        # Advanced Dockerfile with GPU support
-├── docker-compose.yml         # Docker compose configuration
 ├── requirements.txt           # Python dependencies
-├── .dockerignore              # Docker ignore file
+├── setup.sh / setup.bat       # Venv setup scripts
+├── start.sh / start.bat       # Quick start scripts
+├── cleanup.sh / cleanup.bat   # Cleanup scripts
 ├── .env.example               # Environment variables template
 └── README.md                  # This file
 ```
@@ -57,7 +56,7 @@ ai_video_detection/
 - ✅ Frame annotation with bounding boxes
 - ✅ Result export (JSON, CSV)
 - ✅ Performance metrics and logging
-- ✅ Docker containerization
+- ✅ Python virtual environment (venv) isolation
 
 ### Advanced Features
 - 🔧 Batch processing capability
@@ -70,30 +69,40 @@ ai_video_detection/
 ## Installation
 
 ### Prerequisites
-- Docker & Docker Compose
+- Python 3.10+
 - 4GB+ RAM
 - GPU (optional, for faster processing)
 
 ### Quick Start
 
-#### 1. Clone and Setup
+#### 1. Setup Virtual Environment
 ```bash
 cd ai_video_detection
+# On Linux/macOS:
+bash setup.sh
+# On Windows:
+setup.bat
 ```
 
-#### 2. Build Docker Image
+#### 2. Activate Environment
 ```bash
-docker build -t ai-video-detection:latest .
+# On Linux/macOS:
+source venv/bin/activate
+# On Windows:
+venv\Scripts\activate
 ```
 
-#### 3. Run Container
+#### 3. Process Video
 ```bash
-docker-compose up
+python -m app.main
 ```
 
-#### 4. Process Video
+Or use the quick start script:
 ```bash
-docker-compose exec video-detection python -m app.main
+# On Linux/macOS:
+bash start.sh
+# On Windows:
+start.bat
 ```
 
 ## Usage
@@ -196,43 +205,48 @@ PERFORMANCE_CONFIG = {
 }
 ```
 
-## Docker Usage
+## Virtual Environment Usage
 
-### Build Image
+### Setup
 ```bash
-# Standard build
-docker build -t ai-video-detection:latest .
+# On Linux/macOS:
+bash setup.sh
 
-# Advanced build with GPU support
-docker build -f Dockerfile.advanced -t ai-video-detection:gpu --build-arg ENABLE_GPU=true .
+# On Windows:
+setup.bat
 ```
 
-### Run Container
+### Activate Environment
 ```bash
-# Using docker-compose (recommended)
-docker-compose up -d
+# On Linux/macOS:
+source venv/bin/activate
 
-# Manual run
-docker run -it \
-  -v $(pwd)/data:/app/data \
-  -v $(pwd)/logs:/app/logs \
-  ai-video-detection:latest
+# On Windows:
+venv\Scripts\activate
 ```
 
-### Process Webcam (Linux)
+### Run Application
 ```bash
-docker run -it \
-  --device /dev/video0:/dev/video0 \
-  -v $(pwd)/logs:/app/logs \
-  ai-video-detection:latest
+# Process webcam (default)
+python -m app.main
+
+# Process video file
+python -m app.main path/to/video.mp4
+
+# Process RTSP stream
+python -m app.main rtsp://your-stream-url
+```
+
+### Start API Server
+```bash
+uvicorn app.api:app --host 0.0.0.0 --port 8000
 ```
 
 ### GPU Support (NVIDIA)
 ```bash
-# Uncomment GPU lines in docker-compose.yml
-# Requires nvidia-docker
-
-docker-compose up
+# Install PyTorch with CUDA support instead of CPU
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+# Then set device to 'cuda' in app/config/config.py
 ```
 
 ## Output Files
@@ -345,11 +359,11 @@ DATABASE_CONFIG = {
 ### Issue: Low FPS
 **Solution**: Skip frames, use smaller model (yolov8n), or enable GPU
 
-### Issue: Docker Build Fails
-**Solution**: Ensure sufficient disk space, clear Docker cache: `docker system prune`
+### Issue: Dependency Installation Fails
+**Solution**: Ensure Python 3.10+ is installed, then re-run `bash setup.sh`
 
 ### Issue: No GPU Detected
-**Solution**: Install nvidia-docker, uncomment GPU lines in docker-compose.yml
+**Solution**: Install CUDA-compatible PyTorch: `pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118`
 
 ## Environment Variables
 
@@ -365,10 +379,7 @@ LOG_LEVEL=INFO
 ## Testing
 
 ```bash
-# Run tests inside container
-docker-compose exec video-detection pytest tests/
-
-# Or locally
+# Run tests with venv activated
 python -m pytest tests/ -v
 ```
 
@@ -385,16 +396,18 @@ python -m pytest tests/ -v
 Monitor resource usage:
 
 ```bash
-docker stats ai-video-detection
+# Monitor with htop/top on Linux, or Task Manager on Windows
+# View application logs
+tail -f logs/app.log
 ```
 
 ## Security Considerations
 
 1. Use `.env` for sensitive data
-2. Limit container resources (see docker-compose.yml)
-3. Run as non-root user
-4. Use read-only volumes when possible
-5. Scan images for vulnerabilities: `trivy image ai-video-detection:latest`
+2. Run in an isolated virtual environment (venv)
+3. Use environment variables via `.env` file
+4. Keep dependencies updated: `pip list --outdated`
+5. Review code for security best practices
 
 ## Contributing
 
@@ -417,9 +430,48 @@ docker stats ai-video-detection
 
 - [YOLOv8 Documentation](https://docs.ultralytics.com/)
 - [PyTorch Documentation](https://pytorch.org/docs/stable/index.html)
-- [Docker Documentation](https://docs.docker.com/)
+- [Ultralytics YOLOv8](https://github.com/ultralytics/ultralytics)
 
 ---
 
 **Last Updated**: February 4, 2024
 **Version**: 1.0.0
+
+## RTMP / Live Stream Usage
+
+You can provide an RTMP/RTSP stream as the input source via a CLI argument or environment variable. When a live stream is detected (URLs starting with `rtmp://` or `rtsp://`), the application will process indefinitely by default (`max_frames=None`).
+
+Examples:
+
+- CLI (local run):
+
+```bash
+python -m app.main rtmp://localhost:1935/live/streamkey
+```
+
+- Environment variable (Linux/macOS):
+
+```bash
+export VIDEO_SOURCE="rtmp://your.server:1935/live/streamkey"
+python -m app.main
+```
+
+- Environment variable (Windows PowerShell):
+
+```powershell
+$env:VIDEO_SOURCE = 'rtmp://your.server:1935/live/streamkey'
+python -m app.main
+```
+
+- Virtual environment (pass env var):
+
+```bash
+export VIDEO_SOURCE='rtmp://your.server:1935/live/streamkey'
+python -m app.main
+```
+
+Notes:
+
+- You can also set `RTMP_URL` or `RTMP_SOURCE` environment variables; `VIDEO_SOURCE` takes precedence when present.
+- Numeric strings (e.g. `"0"`) passed via CLI or env are coerced to integers and treated as webcam device indices.
+- If you want to limit processing time on a stream, pass a numeric `max_frames` value by editing the call in `app/main.py` or subclassing `PredictionEngine`.

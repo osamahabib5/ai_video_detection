@@ -3,7 +3,7 @@
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Docker & Docker Compose installed
+- Python 3.10+ installed
 - 4GB+ RAM
 - GPU (optional)
 
@@ -14,34 +14,43 @@
 cd ai_video_detection
 ```
 
-#### Step 2: Build Docker image
+#### Step 2: Run setup script
 ```bash
-docker build -t ai-video-detection:latest .
+# On Linux/macOS:
+bash setup.sh
+
+# On Windows:
+setup.bat
 ```
 
-#### Step 3: Start container
+#### Step 3: Activate environment
 ```bash
-docker-compose up -d
+# On Linux/macOS:
+source venv/bin/activate
+
+# On Windows:
+venv\Scripts\activate
 ```
 
 #### Step 4: Process video (choose one)
 
 **Option A: Webcam**
 ```bash
-docker-compose exec video-detection python -m app.main
+python -m app.main
 ```
 
 **Option B: Video file**
 ```bash
-# Copy video to data/videos/
-docker-compose exec video-detection python -m app.main
-# Edit app/config/config.py: VIDEO_CONFIG['input_source'] = 'path/to/video.mp4'
+# Copy video to data/videos/ or specify path
+python -m app.main path/to/video.mp4
+
+# Or edit app/config/config.py: VIDEO_CONFIG['input_source'] = 'path/to/video.mp4'
 ```
 
 **Option C: Using API**
 ```bash
 # Start API server
-docker-compose exec video-detection python -m uvicorn app.api:app --host 0.0.0.0 --port 8000
+uvicorn app.api:app --host 0.0.0.0 --port 8000
 
 # Upload video
 curl -X POST -F "file=@video.mp4" http://localhost:8000/detect/file
@@ -75,12 +84,11 @@ ai_video_detection/
 │   └── test_system.py           # System test
 ├── tests/
 │   └── test_detection.py        # Unit tests
-├── Dockerfile                    # Standard image
-├── docker-compose.yml           # Docker Compose config
 ├── requirements.txt             # Python dependencies
 ├── README.md                    # Full documentation
 ├── QUICKSTART.md               # This file
 ├── Makefile                     # Make commands
+├── setup.sh / setup.bat        # Venv setup scripts
 ├── start.sh / start.bat        # Quick start scripts
 └── cleanup.sh / cleanup.bat    # Cleanup scripts
 ```
@@ -107,10 +115,13 @@ pytest tests/
 cat app/config/config.py
 ```
 
-### Monitor Container
+### Monitor Application
 ```bash
-docker stats ai-video-detection
-docker logs -f ai-video-detection
+# View logs in real-time
+tail -f logs/app.log
+
+# Monitor system resources
+top  # or htop on Linux
 ```
 
 ## ⚙️ Configuration
@@ -147,8 +158,7 @@ Results are saved in `logs/predictions/`:
 |-------|----------|
 | Out of Memory | Reduce frame size or skip frames |
 | Low FPS | Use smaller model (yolov8n) or skip frames |
-| Docker build fails | `docker system prune` to clean cache |
-| GPU not detected | Install nvidia-docker |
+| GPU not detected | Install CUDA-compatible PyTorch |
 
 ## 📈 Performance Tips
 
@@ -179,7 +189,7 @@ If running FastAPI server:
 
 ## 🤝 Support
 
-- Check logs: `docker logs ai-video-detection`
+- Check logs: `tail -f logs/app.log`
 - Review config: `app/config/config.py`
 - Run test: `python scripts/test_system.py`
 - Check README.md for detailed guide

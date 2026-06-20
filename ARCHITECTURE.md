@@ -196,8 +196,7 @@ Output: List of detections per frame
 - **Pydantic**: Data validation
 
 ### Infrastructure
-- **Docker**: Containerization
-- **Docker Compose**: Orchestration
+- **venv**: Python virtual environment isolation
 
 ### Data Processing
 - **NumPy**: Numerical computing
@@ -248,12 +247,12 @@ Local environment → Python interpreter → Logs to console
 
 ### Production (CPU)
 ```
-Docker container → Bound to localhost → Mounted volumes
+venv → Local Python interpreter → Direct file access
 ```
 
 ### Production (GPU)
 ```
-Docker container (nvidia-docker) → GPU acceleration → Persistent storage
+venv + CUDA PyTorch → GPU acceleration → Direct file access
 ```
 
 ### Cloud Deployment

@@ -29,10 +29,10 @@ Choose your path based on your role:
 4. Extend: Modify config and create custom detectors
 
 ### 🚀 **For DevOps Engineers**
-1. Review: [Dockerfile](Dockerfile) and [docker-compose.yml](docker-compose.yml)
-2. Setup: GPU support (optional)
+1. Review: [setup.sh](setup.sh) and [Makefile](Makefile)
+2. Setup: GPU support via CUDA PyTorch
 3. Deploy: To cloud platform
-4. Monitor: Using docker stats
+4. Monitor: Using `tail -f logs/app.log`
 
 ---
 
@@ -61,10 +61,10 @@ Choose your path based on your role:
 ✅ **Results Management** - JSON/CSV export  
 ✅ **Performance Metrics** - FPS, latency tracking  
 
-### Docker Infrastructure (8 files)
-✅ **Dockerfile** - Production image  
-✅ **docker-compose.yml** - Orchestration  
-✅ **Startup Scripts** - Linux & Windows  
+### Deployment Infrastructure (9 files)
+✅ **setup.sh / setup.bat** - Virtual environment setup  
+✅ **start.sh / start.bat** - Quick launch scripts  
+✅ **cleanup.sh / cleanup.bat** - Cleanup utilities  
 ✅ **Makefile** - Convenient commands  
 
 ### Documentation (6 files)
@@ -82,19 +82,19 @@ Choose your path based on your role:
 
 ## 🚀 Quick Start Commands
 
-### 1. Build
+### 1. Setup
 ```bash
-docker build -t ai-video-detection:latest .
+bash setup.sh   # or setup.bat on Windows
 ```
 
-### 2. Run
+### 2. Activate
 ```bash
-docker-compose up -d
+source venv/bin/activate   # or venv\Scripts\activate on Windows
 ```
 
 ### 3. Process
 ```bash
-docker-compose exec video-detection python -m app.main
+python -m app.main
 ```
 
 ### 4. Check Results
@@ -104,7 +104,7 @@ cat logs/predictions/detections.json
 
 ### 5. Stop
 ```bash
-docker-compose down
+# Just press Ctrl+C to stop the application
 ```
 
 ---
@@ -130,10 +130,10 @@ App (Core application)
 ├── utils/logger.py ..................... Logging
 └── utils/helpers.py .................... Utilities
 
-Docker (Deployment)
-├── Dockerfile .......................... Production image
-├── docker-compose.yml .................. Orchestration
-├── start.sh/start.bat .................. Launch scripts
+Deployment Scripts
+├── setup.sh / setup.bat ............... Environment setup
+├── start.sh / start.bat ............... Launch scripts
+├── cleanup.sh / cleanup.bat ........... Cleanup scripts
 └── Makefile ............................ Commands
 
 Data (Storage)
@@ -168,7 +168,7 @@ Testing (Quality)
 - ✅ Frame skipping for optimization
 - ✅ Batch processing
 - ✅ Comprehensive logging
-- ✅ Docker containerization
+- ✅ Virtual environment isolation
 
 ### Professional Features
 - ✅ Production-ready code
@@ -199,19 +199,17 @@ PERFORMANCE_CONFIG['device'] = 'cuda'  # For NVIDIA
 ```bash
 # Copy video to data/videos/
 # Edit app/config/config.py to set source path
-docker-compose exec video-detection python -m app.main
+python -m app.main path/to/video.mp4
 ```
 
 ### View Logs
 ```bash
-docker logs -f ai-video-detection
-# or
 tail -f logs/app.log
 ```
 
 ### Run Tests
 ```bash
-docker-compose exec video-detection pytest tests/
+pytest tests/
 ```
 
 ---
@@ -280,9 +278,9 @@ All settings are in [app/config/config.py](app/config/config.py):
 python -m app.main
 ```
 
-### Production (Docker)
+### Production (venv)
 ```bash
-docker-compose up -d
+bash setup.sh && source venv/bin/activate && python -m app.main
 ```
 
 ### Production (Kubernetes)
@@ -317,11 +315,11 @@ kubectl apply -f deployment.yaml
 
 ## ✅ Verification Checklist
 
-- [ ] Docker installed and running
+- [ ] Python 3.10+ installed
 - [ ] 4GB+ RAM available
 - [ ] Read [QUICKSTART.md](QUICKSTART.md)
-- [ ] Ran `docker build` successfully
-- [ ] Ran `docker-compose up` successfully
+- [ ] Ran `bash setup.sh` successfully
+- [ ] Activated venv and ran `python -m app.main` successfully
 - [ ] Processed test video
 - [ ] Found results in logs/predictions/
 
@@ -331,7 +329,7 @@ kubectl apply -f deployment.yaml
 
 ### Beginner (30 minutes)
 1. Read [QUICKSTART.md](QUICKSTART.md)
-2. Run the system using docker-compose
+2. Run the system using bash start.sh
 3. Process sample video
 4. Check output files
 
@@ -395,7 +393,7 @@ kubectl apply -f deployment.yaml
 **Everything is ready to use:**
 - ✅ Complete application
 - ✅ Full documentation
-- ✅ Docker setup
+- ✅ Virtual environment setup
 - ✅ Example scripts
 - ✅ Tests included
 

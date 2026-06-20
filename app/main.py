@@ -1,14 +1,15 @@
 """
-Main application entry point - Optimized for Docker & CPU Inference
+Main application entry point
 """
 import time
 import sys
+import os
 from pathlib import Path
 from app.utils.logger import Logger
 from app.utils.helpers import FrameProcessor, ResultsManager, MetricsCollector
 from app.detectors.yolo_detector import ObjectDetector
 from app.video_processing.video_processor import VideoProcessor, VideoWriter
-from app.config.config import VIDEO_CONFIG, OUTPUT_CONFIG
+from app.config.config import VIDEO_CONFIG, OUTPUT_CONFIG, VIDEOS_DIR
 
 
 class PredictionEngine:
@@ -126,20 +127,39 @@ def main():
     try:
         engine = PredictionEngine()
         
-        # --- DOCKER VOLUME PATH LOGIC ---
-        # Look for a video file in the mounted data directory
-        video_input_dir = Path("/app/data/videos")
-        video_files = list(video_input_dir.glob("*.mp4")) + list(video_input_dir.glob("*.avi"))
-        
-        if video_files:
-            source = str(video_files[0])
-            logger.info(f"Auto-detected video file: {source}")
+        # Determine video source: CLI arg, ENV vars, mounted files, or webcam
+        env_source = os.environ.get('VIDEO_SOURCE') or os.environ.get('RTMP_URL') or os.environ.get('RTMP_SOURCE')
+        cli_source = None
+        if len(sys.argv) > 1:
+            cli_source = sys.argv[1]
+
+        if cli_source:
+            source = cli_source
+            logger.info(f"Using CLI video source: {source}")
+        elif env_source:
+            source = env_source
+            logger.info(f"Using environment video source: {source}")
         else:
-            logger.warning("No video files found in /app/data/videos. Falling back to webcam (Device 0).")
-            source = 0 
+            # Look for a video file in the local data/videos directory
+            video_input_dir = VIDEOS_DIR
+            video_files = list(video_input_dir.glob("*.mp4")) + list(video_input_dir.glob("*.avi"))
             
-        # Run inference (set max_frames to None to process the whole video)
-        result = engine.process_video(video_source=source, max_frames=200)
+            if video_files:
+                source = str(video_files[0])
+                logger.info(f"Auto-detected video file: {source}")
+            else:
+                logger.warning(f"No video files found in {VIDEOS_DIR}. Falling back to webcam (Device 0).")
+                source = 0
+
+        # Coerce numeric strings to int (e.g., "0") for webcam device indexes
+        if isinstance(source, str) and source.isdigit():
+            source = int(source)
+
+        # If using a live stream (rtmp/rtsp), process indefinitely by default
+        is_stream = isinstance(source, str) and (source.startswith("rtmp://") or source.startswith("rtsp://"))
+        max_frames = None if is_stream else 200
+
+        result = engine.process_video(video_source=source, max_frames=max_frames)
         
         if result['success']:
             logger.info(f"Success! Summary: {result['summary']}")

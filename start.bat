@@ -1,30 +1,29 @@
 @echo off
-REM Build and run the Docker container on Windows
+REM Activate venv and run the application on Windows
 
 setlocal enabledelayedexpansion
 
-echo 🔨 Building Docker image...
-docker build -t ai-video-detection:latest .
+set SCRIPT_DIR=%~dp0
+set VENV_DIR=%SCRIPT_DIR%venv
 
-if !errorlevel! neq 0 (
-    echo ✗ Build failed!
-    exit /b 1
+echo 🚀 AI Video Detection System
+echo ============================
+
+REM Check if venv exists
+if not exist "%VENV_DIR%" (
+    echo ⚠️  Virtual environment not found. Running setup first...
+    call "%SCRIPT_DIR%setup.bat"
 )
 
-echo 📦 Image built successfully!
+REM Activate virtual environment
+echo 🔌 Activating virtual environment...
+call "%VENV_DIR%\Scripts\activate.bat"
 
-echo 🚀 Starting container with docker-compose...
-docker-compose up -d
+echo ✓ Environment activated
+echo.
 
-echo ✓ Container started!
-echo.
-echo Available services:
-echo   - Video Detection: localhost:8000
-echo.
-echo View logs:
-echo   docker-compose logs -f video-detection
-echo.
-echo Stop container:
-echo   docker-compose down
+REM Run the application
+echo 🎯 Starting video detection...
+python -m app.main %*
 
 endlocal

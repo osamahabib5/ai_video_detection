@@ -14,7 +14,7 @@
 - **37 Files** created and organized
 - **3,000+ Lines** of production code
 - **6 Documentation** guides
-- **Docker containerization** included
+- **venv deployment scripts** included
 - **REST API** with 7 endpoints
 - **Unit tests** for quality assurance
 
@@ -50,12 +50,11 @@
 - Stream processing
 - Results download
 
-### 5️⃣ **Docker Deployment**
-- Standard CPU image
-- Advanced GPU support
-- Docker Compose orchestration
-- Resource limits
-- Logging configuration
+### 5️⃣ **Virtual Environment Deployment**
+- One-command setup via setup.sh / setup.bat
+- Isolated Python environment (venv)
+- Quick start via start.sh / start.bat
+- Makefile for common tasks
 
 ---
 
@@ -81,28 +80,34 @@ ai_video_detection/
 │
 ├── scripts/                (Utility scripts)
 ├── tests/                  (Unit tests)
-├── Docker files            (8 deployment files)
-└── Documentation           (6 comprehensive guides)
+├── Shell scripts           (6 deployment scripts)
+└── Documentation           (7 comprehensive guides)
 ```
 
 ---
 
 ## 🚀 Quick Start (3 Steps)
 
-### Step 1: Build
+### Step 1: Setup
 ```bash
 cd ai_video_detection
-docker build -t ai-video-detection:latest .
+# Linux/macOS:
+bash setup.sh
+# Windows:
+setup.bat
 ```
 
-### Step 2: Run
+### Step 2: Activate
 ```bash
-docker-compose up -d
+# Linux/macOS:
+source venv/bin/activate
+# Windows:
+venv\Scripts\activate
 ```
 
 ### Step 3: Process
 ```bash
-docker-compose exec video-detection python -m app.main
+python -m app.main
 ```
 
 **Results saved to**: `logs/predictions/`
@@ -214,7 +219,7 @@ OUTPUT_CONFIG = {
 ✅ Annotated video output  
 ✅ Performance metrics  
 ✅ Comprehensive logging  
-✅ Docker containerization  
+✅ Virtual environment isolation  
 ✅ GPU acceleration support  
 ✅ Unit tests included  
 ✅ Helper scripts  
@@ -265,8 +270,8 @@ Output (JSON/CSV/Video)
 - **Pandas** 2.1.3
 
 ### Infrastructure
-- **Docker**
-- **Docker Compose**
+- **venv** (Python virtual environment)
+- **Makefile** (build automation)
 
 ---
 
@@ -276,7 +281,7 @@ Output (JSON/CSV/Video)
 Distribution by Type:
 ├── Python Files ............ 20 files (1,500 lines)
 ├── Documentation ........... 6 files (1,500 lines)
-├── Docker/Deployment ....... 8 files
+├── Shell Scripts ........... 6 files
 ├── Configuration ........... 3 files
 └── Total ................... 37 files (3,000+ lines)
 
@@ -296,9 +301,9 @@ Distribution by Purpose:
 python -m app.main
 ```
 
-### Docker (Recommended)
+### Virtual Environment (Recommended)
 ```bash
-docker-compose up -d
+bash setup.sh && bash start.sh
 ```
 
 ### Cloud Services
@@ -333,7 +338,7 @@ docker-compose up -d
 - ✅ Object detection (complete)
 - ✅ Results management (complete)
 - ✅ REST API (complete)
-- ✅ Docker setup (complete)
+- ✅ venv setup (complete)
 - ✅ Documentation (complete)
 - ✅ Unit tests (complete)
 - ✅ Helper scripts (complete)
@@ -346,7 +351,7 @@ docker-compose up -d
 
 ### Immediate (5 minutes)
 1. Read [QUICKSTART.md](QUICKSTART.md)
-2. Run `docker-compose up`
+2. Run `bash setup.sh` then `bash start.sh`
 3. Process a test video
 
 ### Short Term (1 hour)
@@ -391,7 +396,7 @@ docker-compose up -d
 | API Endpoints | 7 |
 | Configuration Options | 20+ |
 | Test Cases | 8+ |
-| Docker Features | CPU/GPU support |
+| Deployment | venv-based, CPU/GPU support |
 
 ---
 
@@ -425,7 +430,7 @@ You now have a **complete, professional-grade machine learning system** for real
 ### All with:
 - ✅ Clean, modular code
 - ✅ Comprehensive documentation
-- ✅ Docker containerization
+- ✅ venv-based deployment
 - ✅ REST API
 - ✅ Unit tests
 - ✅ Helper scripts

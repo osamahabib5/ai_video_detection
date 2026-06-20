@@ -1,18 +1,30 @@
 @echo off
-REM Clean up Docker resources on Windows
+REM Clean up virtual environment and cached files on Windows
 
 setlocal enabledelayedexpansion
 
-echo 🧹 Stopping containers...
-docker-compose down
+set SCRIPT_DIR=%~dp0
 
-echo 🗑️  Removing images...
-docker rmi ai-video-detection:latest 2>nul
-docker rmi ai-video-detection:gpu 2>nul
+echo 🧹 Cleaning up project...
 
-echo 🗑️  Pruning build cache...
-docker builder prune -f
+REM Remove virtual environment
+if exist "%SCRIPT_DIR%venv" (
+    echo 🗑️  Removing virtual environment...
+    rmdir /s /q "%SCRIPT_DIR%venv"
+)
+
+REM Remove Python cache files
+echo 🗑️  Removing Python cache...
+for /d /r "%SCRIPT_DIR%" %%d in (__pycache__) do @if exist "%%d" rmdir /s /q "%%d" 2>nul
+del /s /q "%SCRIPT_DIR%*.pyc" 2>nul
+del /s /q "%SCRIPT_DIR%*.pyo" 2>nul
+
+REM Remove pytest cache
+if exist "%SCRIPT_DIR%.pytest_cache" rmdir /s /q "%SCRIPT_DIR%.pytest_cache" 2>nul
 
 echo ✓ Cleanup complete!
+echo.
+echo To rebuild from scratch:
+echo   setup.bat
 
 endlocal

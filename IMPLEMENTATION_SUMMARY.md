@@ -2,7 +2,7 @@
 
 ## ✅ Project Complete
 
-A **production-ready machine learning system** for real-time object detection from video feeds has been successfully created with full Docker containerization.
+A **production-ready machine learning system** for real-time object detection from video feeds has been successfully created.
 
 ---
 
@@ -46,15 +46,12 @@ A **production-ready machine learning system** for real-time object detection fr
   - ResultsManager: Export to JSON/CSV, generate summaries
   - MetricsCollector: Track FPS, latency, processing time
 
-### 🐳 Docker Configuration
+### � Virtual Environment Configuration
 
-- `Dockerfile` - Standard CPU/GPU image (optimized)
-- `Dockerfile.advanced` - Multi-stage with conditional GPU support
-- `docker-compose.yml` - Complete orchestration
-  - Resource limits (2 CPU, 4GB RAM)
-  - Volume mounts for persistent data
-  - Logging configuration
-  - Port mapping (8000)
+- `setup.sh` / `setup.bat` - One-command venv creation and dependency installation
+- `start.sh` / `start.bat` - Quick-start scripts with auto-setup
+- `cleanup.sh` / `cleanup.bat` - Clean virtual environment and caches
+- `Makefile` - Unified setup/run/test/clean commands
 
 ### 📁 Data & Output Structure
 
@@ -163,7 +160,7 @@ Optional:
 - ✅ Rotating file logging
 - ✅ Multiple output formats
 - ✅ Database-ready architecture
-- ✅ Docker containerization with GPU support
+- ✅ Virtual environment isolation
 
 ---
 
@@ -218,7 +215,7 @@ Output Files (JSON/CSV/Video)
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Docker & Docker Compose
+- venv (Python virtual environment)
 - 4GB+ RAM
 - GPU (optional)
 
@@ -228,14 +225,14 @@ Output Files (JSON/CSV/Video)
 # 1. Navigate to project
 cd ai_video_detection
 
-# 2. Build Docker image
-docker build -t ai-video-detection:latest .
+# 2. Setup virtual environment
+bash setup.sh    # or setup.bat on Windows
 
-# 3. Start container
-docker-compose up -d
+# 3. Activate environment
+source venv/bin/activate   # or venv\Scripts\activate on Windows
 
 # 4. Process video
-docker-compose exec video-detection python -m app.main
+python -m app.main
 
 # 5. View results
 cat logs/predictions/detections.json
@@ -244,9 +241,9 @@ cat logs/predictions/detections.json
 ### Alternative: Using Make
 
 ```bash
-make build      # Build Docker image
-make run        # Start container
-make logs       # View logs
+make setup      # Create venv and install dependencies
+make run        # Run detection
+make api        # Start API server
 make test       # Run tests
 make clean      # Cleanup
 ```
@@ -336,7 +333,7 @@ PERFORMANCE_CONFIG['half_precision'] = False
    - Integrate with other systems
 
 5. **Custom Deployment**
-   - Docker containerization
+   - Virtual environment isolation
    - Cloud deployment ready
    - Kubernetes compatible
 
@@ -345,7 +342,7 @@ PERFORMANCE_CONFIG['half_precision'] = False
 ## 🔐 Security Features
 
 - ✅ Input validation
-- ✅ Resource limits (Docker)
+- ✅ Resource management
 - ✅ Timeout mechanisms
 - ✅ Error handling
 - ✅ Logging for audit trail
@@ -361,14 +358,16 @@ PERFORMANCE_CONFIG['half_precision'] = False
 python -m app.main
 ```
 
-### Production (Single Container)
+### Production (Single Machine)
 ```bash
-docker-compose up -d
+bash setup.sh && source venv/bin/activate && python -m app.main
 ```
 
 ### Production (GPU)
 ```bash
-docker-compose up -d  # Requires nvidia-docker
+# Install CUDA PyTorch:
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+# Then run as normal
 ```
 
 ### Cloud Deployment
@@ -388,8 +387,8 @@ docker-compose up -d  # Requires nvidia-docker
 - ✅ Results management (JSON/CSV export)
 - ✅ Performance metrics tracking
 - ✅ REST API with FastAPI
-- ✅ Docker configuration (CPU & GPU)
-- ✅ Docker Compose orchestration
+- ✅ Virtual environment setup (CPU & GPU)
+- ✅ Makefile automation
 - ✅ Unit tests written
 - ✅ Helper scripts created
 - ✅ Comprehensive documentation
@@ -397,7 +396,7 @@ docker-compose up -d  # Requires nvidia-docker
 - ✅ Error handling & logging
 - ✅ Startup scripts (Linux & Windows)
 - ✅ Makefile for easy management
-- ✅ .gitignore & .dockerignore
+- ✅ .gitignore & .env.example
 - ✅ requirements.txt with all dependencies
 - ✅ Project structure documentation
 
@@ -412,7 +411,7 @@ ai_video_detection/
 ├── logs/                         # Output (predictions, logs)
 ├── scripts/                      # Utility scripts
 ├── tests/                        # Unit tests
-├── Docker files                  # 2 Dockerfiles + docker-compose
+├── Shell scripts                 # setup.sh, start.sh, cleanup.sh
 ├── Documentation                 # 5 markdown guides
 ├── Configuration                 # config.py, .env.example
 └── Utilities                     # Makefile, scripts, helpers
@@ -424,7 +423,7 @@ ai_video_detection/
 
 ### For Users
 1. Read QUICKSTART.md
-2. Run: `docker-compose up`
+2. Run: `bash setup.sh && source venv/bin/activate && python -m app.main`
 3. Process videos and view results
 
 ### For Developers
@@ -434,8 +433,8 @@ ai_video_detection/
 4. Create custom detectors
 
 ### For DevOps
-1. Review Dockerfile & docker-compose.yml
-2. Set up GPU support (nvidia-docker)
+1. Review setup.sh and Makefile
+2. Set up GPU support (CUDA PyTorch)
 3. Deploy to cloud platform
 4. Set up monitoring & logging
 
@@ -448,7 +447,7 @@ You now have a **complete, production-ready machine learning system** for:
 - ✅ Video processing
 - ✅ Results management
 - ✅ REST API interface
-- ✅ Docker containerization
+- ✅ Virtual environment isolation
 - ✅ Easy deployment
 
 **Everything is modular, documented, tested, and ready to scale!**

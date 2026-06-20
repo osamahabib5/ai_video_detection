@@ -8,16 +8,14 @@
 ├── 📄 ARCHITECTURE.md                    # System architecture & design
 ├── 📄 requirements.txt                   # Python dependencies (PyTorch, YOLOv8, etc.)
 ├── 📄 .gitignore                         # Git ignore rules
-├── 📄 .dockerignore                      # Docker ignore rules
 ├── 📄 .env.example                       # Environment variables template
 │
-├── 🐳 DOCKER CONFIGURATION
-│   ├── 📄 Dockerfile                     # Standard CPU/GPU Docker image
-│   ├── 📄 Dockerfile.advanced            # Advanced multi-stage build with GPU support
-│   ├── 📄 docker-compose.yml             # Docker Compose orchestration
-│   ├── 📄 start.sh                       # Linux startup script
+├── 🐍 DEPLOYMENT SCRIPTS
+│   ├── 📄 setup.sh                       # Linux/macOS venv setup script
+│   ├── 📄 setup.bat                      # Windows venv setup script
+│   ├── 📄 start.sh                       # Linux/macOS startup script
 │   ├── 📄 start.bat                      # Windows startup script
-│   ├── 📄 cleanup.sh                     # Linux cleanup script
+│   ├── 📄 cleanup.sh                     # Linux/macOS cleanup script
 │   ├── 📄 cleanup.bat                    # Windows cleanup script
 │   └── 📄 Makefile                       # Make commands for easy management
 │
@@ -136,8 +134,8 @@ api.py (FastAPI)
 
 ### For Users
 1. Read: QUICKSTART.md
-2. Run: `docker-compose up`
-3. Process: `docker-compose exec video-detection python -m app.main`
+2. Run: `bash setup.sh && source venv/bin/activate`
+3. Process: `python -m app.main`
 
 ### For Developers
 1. Read: README.md + ARCHITECTURE.md
@@ -147,10 +145,10 @@ api.py (FastAPI)
 5. Extend: Create custom detectors
 
 ### For DevOps
-1. Review: Dockerfile + docker-compose.yml
+1. Review: setup.sh and Makefile
 2. Check: requirements.txt
-3. Setup: GPU support (nvidia-docker)
-4. Monitor: docker stats, logs
+3. Setup: GPU support via CUDA PyTorch
+4. Monitor: tail -f logs/app.log
 
 ## 📈 Data Flow Summary
 

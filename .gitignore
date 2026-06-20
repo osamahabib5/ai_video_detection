@@ -57,7 +57,13 @@ data/videos/*.avi
 .env.local
 .env.*.local
 
-# Docker
+# Virtual Environment
+venv/
+env/
+ENV/
+.venv/
+
+# Deployment artifacts
 .docker/
 
 # OS

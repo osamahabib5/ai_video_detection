@@ -1,23 +1,27 @@
 #!/bin/bash
-# Build and run the Docker container
+# Activate venv and run the application
 
 set -e
 
-echo "🔨 Building Docker image..."
-docker build -t ai-video-detection:latest .
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+VENV_DIR="$SCRIPT_DIR/venv"
 
-echo "📦 Image built successfully!"
+echo "🚀 AI Video Detection System"
+echo "============================"
 
-echo "🚀 Starting container with docker-compose..."
-docker-compose up -d
+# Check if venv exists
+if [ ! -d "$VENV_DIR" ]; then
+    echo "⚠️  Virtual environment not found. Running setup first..."
+    bash "$SCRIPT_DIR/setup.sh"
+fi
 
-echo "✓ Container started!"
+# Activate virtual environment
+echo "🔌 Activating virtual environment..."
+source "$VENV_DIR/bin/activate"
+
+echo "✓ Environment activated"
 echo ""
-echo "Available services:"
-echo "  - Video Detection: localhost:8000"
-echo ""
-echo "View logs:"
-echo "  docker-compose logs -f video-detection"
-echo ""
-echo "Stop container:"
-echo "  docker-compose down"
+
+# Run the application
+echo "🎯 Starting video detection..."
+python -m app.main "$@"
