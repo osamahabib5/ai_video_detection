@@ -9,23 +9,40 @@ VENV_DIR="$SCRIPT_DIR/venv"
 echo "🐍 Setting up Python Virtual Environment..."
 echo "============================================"
 
-# Check Python version
-PYTHON_VERSION=$(python3 --version 2>&1 | awk '{print $2}')
+# Check Python version (try python3 first, fall back to python on Windows)
+PYTHON_CMD="python3"
+if ! command -v python3 &> /dev/null; then
+    PYTHON_CMD="python"
+fi
+PYTHON_VERSION=$($PYTHON_CMD --version 2>&1 | awk '{print $2}')
 echo "📌 Python version: $PYTHON_VERSION"
 
 # Create virtual environment
 if [ ! -d "$VENV_DIR" ]; then
     echo "🔧 Creating virtual environment at: $VENV_DIR"
-    python3 -m venv "$VENV_DIR"
+    $PYTHON_CMD -m venv "$VENV_DIR"
     echo "✓ Virtual environment created"
 else
     echo "⚠️  Virtual environment already exists at: $VENV_DIR"
 fi
 
+# Detect Windows vs Unix activate path
+# On Windows (even Git Bash), Python venv uses Scripts/ not bin/
+if [ -f "$VENV_DIR/Scripts/activate" ]; then
+    VENV_ACTIVATE="$VENV_DIR/Scripts/activate"
+    echo "🪟 Detected Windows-style venv (Scripts/)"
+elif [ -f "$VENV_DIR/bin/activate" ]; then
+    VENV_ACTIVATE="$VENV_DIR/bin/activate"
+    echo "🐧 Detected Unix-style venv (bin/)"
+else
+    echo "❌ Cannot find venv activation script!"
+    exit 1
+fi
+
 # Activate and install dependencies
 echo ""
 echo "📦 Activating environment and installing dependencies..."
-source "$VENV_DIR/bin/activate"
+source "$VENV_ACTIVATE"
 
 # Upgrade pip
 echo "⬆️  Upgrading pip..."
@@ -52,8 +69,12 @@ echo ""
 echo "============================================"
 echo "✅ Setup complete!"
 echo ""
-echo "To activate the environment:"
-echo "  source venv/bin/activate"
+echo "To activate the environment later, run:"
+if [ -f "$VENV_DIR/Scripts/activate" ]; then
+    echo "  source venv/Scripts/activate"
+else
+    echo "  source venv/bin/activate"
+fi
 echo ""
 echo "To run the application:"
 echo "  python -m app.main"

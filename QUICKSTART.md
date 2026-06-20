@@ -16,19 +16,22 @@ cd ai_video_detection
 
 #### Step 2: Run setup script
 ```bash
-# On Linux/macOS:
+# On Linux/macOS or Windows (Git Bash / WSL):
 bash setup.sh
 
-# On Windows:
+# On Windows (Command Prompt / PowerShell):
 setup.bat
 ```
 
 #### Step 3: Activate environment
 ```bash
-# On Linux/macOS:
+# On Linux/macOS or WSL:
 source venv/bin/activate
 
-# On Windows:
+# On Windows (Git Bash):
+source venv/Scripts/activate
+
+# On Windows (Command Prompt / PowerShell):
 venv\Scripts\activate
 ```
 

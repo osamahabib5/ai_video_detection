@@ -78,17 +78,19 @@ ai_video_detection/
 #### 1. Setup Virtual Environment
 ```bash
 cd ai_video_detection
-# On Linux/macOS:
+# On Linux/macOS or Windows (Git Bash / WSL):
 bash setup.sh
-# On Windows:
+# On Windows (Command Prompt / PowerShell):
 setup.bat
 ```
 
 #### 2. Activate Environment
 ```bash
-# On Linux/macOS:
+# On Linux/macOS or WSL:
 source venv/bin/activate
-# On Windows:
+# On Windows (Git Bash):
+source venv/Scripts/activate
+# On Windows (Command Prompt / PowerShell):
 venv\Scripts\activate
 ```
 
@@ -209,19 +211,22 @@ PERFORMANCE_CONFIG = {
 
 ### Setup
 ```bash
-# On Linux/macOS:
+# On Linux/macOS or Windows (Git Bash / WSL):
 bash setup.sh
 
-# On Windows:
+# On Windows (Command Prompt / PowerShell):
 setup.bat
 ```
 
 ### Activate Environment
 ```bash
-# On Linux/macOS:
+# On Linux/macOS or WSL:
 source venv/bin/activate
 
-# On Windows:
+# On Windows (Git Bash):
+source venv/Scripts/activate
+
+# On Windows (Command Prompt / PowerShell):
 venv\Scripts\activate
 ```
 
