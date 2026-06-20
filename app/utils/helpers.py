@@ -94,7 +94,7 @@ class ResultsManager:
         
         with open(output_path, 'w', newline='') as f:
             writer = csv.writer(f)
-            writer.writerow(['frame_id', 'timestamp', 'class_id', 'confidence', 'bbox'])
+            writer.writerow(['frame_id', 'timestamp', 'class_id', 'class_name', 'confidence', 'bbox'])
             
             for result in self.results:
                 for detection in result['detections']:
@@ -102,9 +102,53 @@ class ResultsManager:
                         result['frame_id'],
                         result['timestamp'],
                         detection['class_id'],
+                        detection['class_name'],
                         detection['confidence'],
                         ','.join(map(str, detection['bbox']))
                     ])
+        
+        return str(output_path)
+    
+    def save_objects_summary(self, filename='objects_detected.csv'):
+        """Save a CSV with unique object classes and their detection counts."""
+        import csv
+        from collections import Counter
+        
+        output_path = self.output_dir / filename
+        
+        # Count detections per class
+        class_counter = Counter()
+        class_confidence_sums = {}
+        for result in self.results:
+            for d in result['detections']:
+                name = d['class_name']
+                class_counter[name] += 1
+                class_confidence_sums.setdefault(name, []).append(d['confidence'])
+        
+        with open(output_path, 'w', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow(['class_name', 'class_id', 'total_detections',
+                             'avg_confidence', 'min_confidence', 'max_confidence'])
+            
+            for class_name, count in class_counter.most_common():
+                confs = class_confidence_sums[class_name]
+                # Find class_id from the first detection of this class
+                class_id = ''
+                for result in self.results:
+                    for d in result['detections']:
+                        if d['class_name'] == class_name:
+                            class_id = d['class_id']
+                            break
+                    if class_id != '':
+                        break
+                writer.writerow([
+                    class_name,
+                    class_id,
+                    count,
+                    round(sum(confs) / len(confs), 4),
+                    round(min(confs), 4),
+                    round(max(confs), 4),
+                ])
         
         return str(output_path)
     

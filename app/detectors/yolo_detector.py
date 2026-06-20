@@ -5,7 +5,7 @@ import torch
 from ultralytics import YOLO
 import time
 from app.utils.logger import Logger
-from app.config.config import MODEL_CONFIG, PERFORMANCE_CONFIG
+from app.config.config import MODEL_CONFIG, PERFORMANCE_CONFIG, DETECTION_CONFIG
 
 
 class ObjectDetector:
@@ -15,7 +15,18 @@ class ObjectDetector:
         self.logger = Logger.get_logger(__name__)
         self.model = None
         self.device = self._get_device()
+        self._class_filter = self._build_class_filter()
         self.load_model()
+    
+    def _build_class_filter(self):
+        """Build a set of allowed class IDs from DETECTION_CONFIG filter."""
+        filter_mode = DETECTION_CONFIG.get('filter_mode')
+        filter_list = DETECTION_CONFIG.get('filter_list', [])
+        if not filter_mode or not filter_list:
+            return None  # no filtering
+        # Normalize filter list to lowercase
+        filter_set = {name.lower() for name in filter_list}
+        return {'mode': filter_mode, 'names': filter_set}
     
     def _get_device(self):
         """Determine available device"""
@@ -90,10 +101,21 @@ class ObjectDetector:
             x1, y1, x2, y2 = box.xyxy[0].cpu().numpy()
             confidence = float(box.conf[0])
             class_id = int(box.cls[0])
+            class_name = result.names[class_id]
+            
+            # --- Apply class-name filter ---
+            if self._class_filter is not None:
+                name_lower = class_name.lower()
+                mode = self._class_filter['mode']
+                allowed = self._class_filter['names']
+                if mode == 'allow' and name_lower not in allowed:
+                    continue  # skip this detection
+                elif mode == 'deny' and name_lower in allowed:
+                    continue  # skip this detection
             
             detection = {
                 'class_id': class_id,
-                'class_name': result.names[class_id],
+                'class_name': class_name,
                 'confidence': confidence,
                 'bbox': [float(x1), float(y1), float(x2), float(y2)],
                 'bbox_width': float(x2 - x1),

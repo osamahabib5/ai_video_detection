@@ -94,6 +94,10 @@ class PredictionEngine:
             if OUTPUT_CONFIG['output_format'] in ['csv', 'both']:
                 self.results_manager.save_csv()
             
+            # Always save the unique-objects summary
+            objects_csv_path = self.results_manager.save_objects_summary()
+            self.logger.info(f"Unique objects summary saved to: {objects_csv_path}")
+            
             summary = self.results_manager.get_summary()
             metrics = self.metrics_collector.get_metrics()
             
@@ -117,6 +121,11 @@ class PredictionEngine:
         if self.detector:
             self.detector.unload_model()
         self.logger.info("Shutdown complete")
+
+    def predict_single_frame(self, frame):
+        """Run detection on a single frame (no video loop)."""
+        detections, inference_time = self.detector.predict(frame)
+        return detections
 
 
 def main():

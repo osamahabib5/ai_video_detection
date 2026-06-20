@@ -40,9 +40,18 @@ VIDEO_CONFIG = {
 
 # Detection Configuration
 DETECTION_CONFIG = {
-    'classes': None, # None for all, or e.g., [0] for only people
+    'classes': None, # None for all COCO classes, or e.g., [0] for only people
     'agnostic_nms': False,
     'max_time_threshold': 5.0,
+    # --- Class Name Filter ---
+    # 'filter_mode': 'allow'  → keep ONLY classes in filter_list
+    # 'filter_mode': 'deny'   → remove classes in filter_list
+    # 'filter_mode': None     → no filtering (default)
+    'filter_mode': 'allow',      # ← enabled for squirrel/sparrow video
+    # List of COCO class NAMES to allow (case-insensitive)
+    # IMPORTANT: YOLOv8-COCO has NO 'squirrel' class. The model will NOT detect squirrels.
+    # For this video: keep 'bird' for sparrows; squirrels cannot be detected without a custom model.
+    'filter_list': ['bird'],
 }
 
 # Output Configuration

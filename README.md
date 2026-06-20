@@ -182,11 +182,15 @@ VIDEO_CONFIG = {
 ### Detection Configuration
 ```python
 DETECTION_CONFIG = {
-    'classes': None,  # All classes
+    'classes': None,  # None = all 80 COCO classes, or e.g. [0, 14] for person+bird only
     'agnostic_nms': False,
     'max_time_threshold': 5.0,
+    'filter_mode': None,     # 'allow' (keep only filter_list) | 'deny' | None (no filter)
+    'filter_list': [],       # Class names e.g. ['bird'] — filter before saving results
 }
 ```
+
+> **💡 Tip**: If your video only contains sparrows, set `filter_list: ['bird']` with `filter_mode: 'allow'` to exclude wrong detections. Note YOLOv8-COCO has **no squirrel/chipmunk class** — that's why the model mislabels them as cow/dog/bear.
 
 ### Output Configuration
 ```python
@@ -280,8 +284,15 @@ After processing, outputs are saved in `logs/predictions/`:
 
 ### detections.csv
 ```
-frame_id,timestamp,class_id,confidence,bbox
-0,2024-02-04T10:30:45.123456,0,0.95,"100.5,200.3,350.8,500.2"
+frame_id,timestamp,class_id,class_name,confidence,bbox
+0,2024-02-04T10:30:45.123456,0,person,0.95,"100.5,200.3,350.8,500.2"
+```
+
+### objects_detected.csv (unique classes only)
+```
+class_name,class_id,total_detections,avg_confidence,min_confidence,max_confidence
+person,0,450,0.912,0.689,0.987
+bird,14,120,0.784,0.512,0.921
 ```
 
 ## Performance Metrics
