@@ -4,9 +4,6 @@ __pycache__/
 *$py.class
 *.so
 .Python
-env/
-venv/
-ENV/
 build/
 develop-eggs/
 dist/
@@ -26,6 +23,12 @@ wheels/
 .mypy_cache/
 .ruff_cache/
 
+# Virtual Environment
+venv/
+env/
+ENV/
+.venv/
+
 # IDEs
 .vscode/
 .idea/
@@ -42,29 +45,23 @@ wheels/
 htmlcov/
 .tox/
 
-# Logs
+# Logs & Outputs
 logs/
 *.log
 
-# Data
+# Data (keep directory structure, ignore large binary files)
 data/models/*.pt
 data/videos/*.mp4
 data/videos/*.avi
 *.db
 
+# Downloaded YOLO models (from ultralytics auto-download)
+*.pt
+
 # Environment
 .env
 .env.local
 .env.*.local
-
-# Virtual Environment
-venv/
-env/
-ENV/
-.venv/
-
-# Deployment artifacts
-.docker/
 
 # OS
 Thumbs.db
@@ -73,3 +70,4 @@ Thumbs.db
 .tmp/
 *.tmp
 *.temp
+__pycache__/

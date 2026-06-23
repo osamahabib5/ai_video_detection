@@ -20,11 +20,32 @@ VIDEOS_DIR.mkdir(exist_ok=True)
 
 # Model Configuration
 MODEL_CONFIG = {
-    'model_name': 'yolov8m',
-    'model_path': str(MODELS_DIR / 'yolov8m.pt'),
-    'confidence_threshold': 0.50, # Slightly higher to reduce "Truck" false positives
-    'iou_threshold': 0.50,
+    # 'yolo' = standard YOLOv8 (80 COCO classes)
+    # 'yolo-world' = open-vocabulary YOLO-World (any custom classes)
+    'model_type': 'yolo-world',
+    'model_name': 'yolov8s-world.pt',  # 's'=fast CPU, 'm'/'l'/'x' for accuracy
+    'model_path': str(MODELS_DIR / 'yolov8s-world.pt'),
+    'confidence_threshold': 0.35,
+    'iou_threshold': 0.45,
     'max_detections': 100,
+    # Custom classes for YOLO-World (warehouse safety detection)
+    'custom_classes': [
+        'person', 'hardhat', 'helmet',
+        'safety vest', 'high-visibility vest',
+        'box', 'cardboard box', 'package',
+        'forklift', 'pallet jack',
+    ],
+}
+
+# Safety Compliance Configuration
+SAFETY_CONFIG = {
+    'enabled': True,                         # Enable/disable safety compliance checking
+    'require_hardhat': True,                  # Alert if person near no hardhat
+    'require_vest': True,                     # Alert if person near no safety vest
+    'check_lifting': True,                    # Check lifting posture (needs pose model)
+    'alert_webhook_url': None,                # Slack/Teams webhook URL (optional)
+    'save_violations': True,                  # Save violations to JSON and CSV
+    'output_directory': str(LOGS_DIR / 'violations'),  # Violation output directory
 }
 
 # Video Processing Configuration
@@ -43,15 +64,13 @@ DETECTION_CONFIG = {
     'classes': None, # None for all COCO classes, or e.g., [0] for only people
     'agnostic_nms': False,
     'max_time_threshold': 5.0,
-    # --- Class Name Filter ---
+    # --- Class Name Filter (for standard YOLOv8 mode) ---
     # 'filter_mode': 'allow'  → keep ONLY classes in filter_list
     # 'filter_mode': 'deny'   → remove classes in filter_list
     # 'filter_mode': None     → no filtering (default)
-    'filter_mode': 'allow',      # ← enabled for squirrel/sparrow video
-    # List of COCO class NAMES to allow (case-insensitive)
-    # IMPORTANT: YOLOv8-COCO has NO 'squirrel' class. The model will NOT detect squirrels.
-    # For this video: keep 'bird' for sparrows; squirrels cannot be detected without a custom model.
-    'filter_list': ['bird'],
+    # NOT needed when using YOLO-World (custom_classes handles it natively)
+    'filter_mode': None,
+    'filter_list': [],
 }
 
 # Output Configuration

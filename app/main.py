@@ -1,5 +1,5 @@
 """
-Main application entry point
+Main application entry point — Warehouse Safety Detection System
 """
 import time
 import sys
@@ -9,11 +9,13 @@ from app.utils.logger import Logger
 from app.utils.helpers import FrameProcessor, ResultsManager, MetricsCollector
 from app.detectors.yolo_detector import ObjectDetector
 from app.video_processing.video_processor import VideoProcessor, VideoWriter
-from app.config.config import VIDEO_CONFIG, OUTPUT_CONFIG, VIDEOS_DIR
+from app.safety.compliance_checker import ComplianceChecker
+from app.safety.alert_manager import AlertManager
+from app.config.config import VIDEO_CONFIG, OUTPUT_CONFIG, VIDEOS_DIR, SAFETY_CONFIG
 
 
 class PredictionEngine:
-    """Main prediction engine orchestrating the entire pipeline"""
+    """Main prediction engine — detection + safety compliance + alerts"""
     
     def __init__(self):
         self.logger = Logger.get_logger(__name__)
@@ -21,13 +23,15 @@ class PredictionEngine:
         self.video_processor = None
         self.results_manager = None
         self.metrics_collector = None
+        self.compliance_checker = None
+        self.alert_manager = None
         self.initialize()
     
     def initialize(self):
         """Initialize all components"""
-        self.logger.info("Initializing Prediction Engine...")
+        self.logger.info("Initializing Warehouse Safety Detection Engine...")
         
-        # Initialize detector - Ensure it's in Predict mode
+        # Initialize detector
         self.detector = ObjectDetector()
         
         # Initialize results manager
@@ -37,6 +41,16 @@ class PredictionEngine:
         
         # Initialize metrics collector
         self.metrics_collector = MetricsCollector()
+        
+        # Initialize safety compliance (if enabled)
+        if SAFETY_CONFIG.get('enabled', False):
+            self.compliance_checker = ComplianceChecker(rules_config=SAFETY_CONFIG)
+            violation_dir = Path(SAFETY_CONFIG.get('output_directory', 'logs/violations'))
+            violation_dir.mkdir(parents=True, exist_ok=True)
+            self.alert_manager = AlertManager(str(violation_dir), config=SAFETY_CONFIG)
+            self.logger.info("Safety compliance monitoring ENABLED")
+        else:
+            self.logger.info("Safety compliance monitoring DISABLED")
         
         self.logger.info("Prediction Engine initialized successfully")
     
@@ -82,6 +96,20 @@ class PredictionEngine:
             # Track metrics
             self.metrics_collector.add_frame_time(frame_result['total_processing_time'])
             self.metrics_collector.add_inference_time(frame_result['inference_time'])
+            
+            # --- Safety compliance check ---
+            if self.compliance_checker and detections:
+                violations = self.compliance_checker.check_frame(detections)
+                if violations:
+                    self.alert_manager.add_violations(
+                        frame_result['frame_id'],
+                        FrameProcessor.get_frame_timestamp(),
+                        violations
+                    )
+                    # Draw warning text on frame if violations found
+                    annotated_frame = FrameProcessor.draw_violation_warnings(
+                        annotated_frame, violations
+                    )
         
         try:
             # Process video (ensure detector.predict is used inside .process)
@@ -97,6 +125,16 @@ class PredictionEngine:
             # Always save the unique-objects summary
             objects_csv_path = self.results_manager.save_objects_summary()
             self.logger.info(f"Unique objects summary saved to: {objects_csv_path}")
+            
+            # Save safety violations if enabled
+            if self.alert_manager and SAFETY_CONFIG.get('save_violations', True):
+                violations_json = self.alert_manager.save_violations_json()
+                violations_csv = self.alert_manager.save_violations_csv()
+                violation_summary = self.alert_manager.get_summary()
+                self.logger.info(
+                    f"Safety violations: {violation_summary['total_violations']} total | "
+                    f"{violation_summary['by_type']}"
+                )
             
             summary = self.results_manager.get_summary()
             metrics = self.metrics_collector.get_metrics()

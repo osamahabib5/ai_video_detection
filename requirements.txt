@@ -5,8 +5,8 @@ torchvision>=0.16.1
 torchaudio>=2.1.1
 
 
-# Object Detection
-ultralytics>=8.0.206
+# Object Detection (includes YOLOv8 + YOLO-World support)
+ultralytics>=8.2.0
 opencv-python-headless>=4.8.1.78
 
 # Data Processing

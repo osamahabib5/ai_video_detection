@@ -58,6 +58,19 @@ class FrameProcessor:
         """Get current timestamp"""
         return datetime.now().isoformat()
 
+    @staticmethod
+    def draw_violation_warnings(frame, violations):
+        """Overlay safety violation warnings on frame."""
+        annotated = frame.copy()
+        y_offset = 30
+        for v in violations:
+            color = (0, 0, 255) if v['severity'] in ('HIGH', 'CRITICAL') else (0, 165, 255)
+            text = f"⚠ {v['type']}: {v['message'][:60]}"
+            cv2.putText(annotated, text, (10, y_offset),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.55, color, 2)
+            y_offset += 25
+        return annotated
+
 
 class ResultsManager:
     """Manage detection results storage and output"""

@@ -1,6 +1,15 @@
-# AI Video Detection System
+# AI Video Detection System — Warehouse Safety Edition
 
-Real-time object detection system for video feeds using YOLOv8.
+Real-time warehouse safety compliance monitoring using YOLO-World. Detects PPE violations (missing hardhat/vest) and unsafe lifting posture, with automatic alert generation.
+
+## Overview
+
+This system:
+- **Detects workers, PPE, and equipment** in warehouse video feeds
+- **Checks compliance** — hardhat, safety vest, safe lifting posture
+- **Generates alerts** for violations (console, JSON, CSV, webhook)
+- **Saves results** in JSON/CSV format
+- **Runs in a Python virtual environment** for easy deployment
 
 ## Overview
 
@@ -29,6 +38,10 @@ ai_video_detection/
 │   │   └── video_processor.py # Video capture and processing
 │   ├── models/                # Custom model architectures (optional)
 │   │   └── __init__.py
+│   ├── safety/                # Warehouse safety compliance
+│   │   ├── __init__.py
+│   │   ├── compliance_checker.py  # PPE & posture rule checks
+│   │   └── alert_manager.py       # Violation logging & alerts
 │   └── utils/
 │       ├── __init__.py
 │       ├── logger.py          # Logging utilities
@@ -50,11 +63,11 @@ ai_video_detection/
 ## Features
 
 ### Core Features
-- ✅ Real-time object detection from video streams
-- ✅ Support for multiple video sources (webcam, file, RTSP stream)
-- ✅ Configurable detection thresholds
-- ✅ Frame annotation with bounding boxes
-- ✅ Result export (JSON, CSV)
+- ✅ Real-time warehouse worker detection
+- ✅ PPE compliance: hardhat/helmet + safety vest checks
+- ✅ Unsafe lifting posture detection (with YOLOv8-pose)
+- ✅ Automatic violation alerts (console, JSON, CSV, webhook-ready)
+- ✅ Frame annotation with bounding boxes + violation warnings
 - ✅ Performance metrics and logging
 - ✅ Python virtual environment (venv) isolation
 
@@ -161,12 +174,16 @@ Edit `app/config/config.py` to customize:
 ### Model Configuration
 ```python
 MODEL_CONFIG = {
-    'model_name': 'yolov8m',
-    'confidence_threshold': 0.45,
-    'iou_threshold': 0.50,
+    'model_type': 'yolo-world',         # 'yolo' (80 COCO classes) or 'yolo-world' (open-vocabulary)
+    'model_name': 'yolov8s-world.pt',   # 's'=fast, 'm'=balanced, 'l'/'x'=accurate
+    'confidence_threshold': 0.40,
+    'iou_threshold': 0.45,
     'max_detections': 100,
+    'custom_classes': ['squirrel', 'bird', 'sparrow'],  # ← YOLO-World: ANY classes you want!
 }
 ```
+
+> **🎯 YOLO-World** detects ANY object you name — no training required. Just list your classes in `custom_classes` and the model finds them. Switch back to standard YOLOv8 by setting `model_type: 'yolo'` with `model_name: 'yolov8m'`.
 
 ### Video Configuration
 ```python
@@ -182,15 +199,29 @@ VIDEO_CONFIG = {
 ### Detection Configuration
 ```python
 DETECTION_CONFIG = {
-    'classes': None,  # None = all 80 COCO classes, or e.g. [0, 14] for person+bird only
+    'classes': None,  # None = all, or e.g. [0, 14] for person+bird only (YOLOv8 only)
     'agnostic_nms': False,
     'max_time_threshold': 5.0,
-    'filter_mode': None,     # 'allow' (keep only filter_list) | 'deny' | None (no filter)
-    'filter_list': [],       # Class names e.g. ['bird'] — filter before saving results
+    'filter_mode': None,     # 'allow' | 'deny' | None — class filter (for YOLOv8 mode)
+    'filter_list': [],       # Class names to allow/deny
 }
 ```
 
-> **💡 Tip**: If your video only contains sparrows, set `filter_list: ['bird']` with `filter_mode: 'allow'` to exclude wrong detections. Note YOLOv8-COCO has **no squirrel/chipmunk class** — that's why the model mislabels them as cow/dog/bear.
+> **💡 YOLO-World vs standard YOLOv8**:
+> - **YOLO-World** (`model_type: 'yolo-world'`): set `custom_classes` in MODEL_CONFIG, detects ONLY those
+> - **YOLOv8** (`model_type: 'yolo'`): 80 COCO classes only, use `filter_list` to narrow results
+
+### Safety Compliance Configuration
+```python
+SAFETY_CONFIG = {
+    'enabled': True,                     # Enable safety checks
+    'require_hardhat': True,            # Alert if worker has no hardhat nearby
+    'require_vest': True,               # Alert if worker has no safety vest nearby
+    'check_lifting': True,              # Check lifting posture (with pose model)
+    'alert_webhook_url': None,          # Slack/Teams webhook for real-time alerts
+    'save_violations': True,            # Save violations to logs/violations/
+}
+```
 
 ### Output Configuration
 ```python
