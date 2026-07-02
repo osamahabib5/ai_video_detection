@@ -68,8 +68,8 @@ class PredictionEngine:
         if OUTPUT_CONFIG['annotate_frames'] and OUTPUT_CONFIG['video_output']:
             video_writer = VideoWriter(
                 OUTPUT_CONFIG['video_output_path'],
-                VIDEO_CONFIG['frame_rate'],
-                (VIDEO_CONFIG['frame_width'], VIDEO_CONFIG['frame_height'])
+                self.video_processor.fps,
+                self.video_processor.frame_size
             )
         
         def frame_callback(frame, detections, frame_result):

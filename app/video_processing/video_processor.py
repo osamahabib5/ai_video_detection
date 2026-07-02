@@ -7,13 +7,18 @@ from pathlib import Path
 class VideoProcessor:
     """Orchestrates video capture, detection, and frame processing."""
 
-    def __init__(self, detector, video_source):
+    def __init__(self, detector, video_source, config=None):
         self.logger = logging.getLogger(__name__)
         self.detector = detector
+        self.config = config
 
         # Normalize source: Path objects -> string
         if isinstance(video_source, Path):
             video_source = str(video_source)
+
+        # Handle HTTP/HTTPS URLs
+        if isinstance(video_source, str) and (video_source.startswith('http://') or video_source.startswith('https://')):
+            self.logger.info(f"Using direct web URL: {video_source}")
 
         self.source = video_source
 
