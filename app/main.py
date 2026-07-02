@@ -99,7 +99,8 @@ class PredictionEngine:
             
             # --- Safety compliance check ---
             if self.compliance_checker and detections:
-                violations = self.compliance_checker.check_frame(detections)
+                violations = self.compliance_checker.check_frame(
+                    detections, frame_shape=frame.shape[:2])
                 if violations:
                     self.alert_manager.add_violations(
                         frame_result['frame_id'],

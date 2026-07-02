@@ -37,15 +37,28 @@ MODEL_CONFIG = {
     ],
 }
 
-# Safety Compliance Configuration
+# Safety Compliance Configuration (Australian WHS Framework)
 SAFETY_CONFIG = {
-    'enabled': True,                         # Enable/disable safety compliance checking
-    'require_hardhat': True,                  # Alert if person near no hardhat
-    'require_vest': True,                     # Alert if person near no safety vest
-    'check_lifting': True,                    # Check lifting posture (needs pose model)
-    'alert_webhook_url': None,                # Slack/Teams webhook URL (optional)
-    'save_violations': True,                  # Save violations to JSON and CSV
-    'output_directory': str(LOGS_DIR / 'violations'),  # Violation output directory
+    'enabled': True,
+    # ---- WHS §9: PPE Management ----
+    'require_hardhat': True,           # Hardhat/helmet must be near person
+    'require_vest': True,              # Hi-vis vest must be near person
+    'require_gloves': False,           # Gloves required (needs glove class in model)
+    'require_boots': False,            # Safety boots required (needs boot class)
+    # ---- WHS §4: Manual Handling ----
+    'check_lifting': True,             # Unsafe bending posture near boxes
+    'check_twisting': True,            # Trunk twisting while handling loads
+    'check_overhead_lift': True,       # Overhead reaching with load
+    # ---- WHS §6: Plant & Equipment ----
+    'check_forklift_zone': True,       # Pedestrian near forklift exclusion zone
+    # ---- WHS §2: Working at Heights ----
+    'check_edge_proximity': False,     # Person near unprotected edge (needs frame_shape)
+    # ---- WHS §3: Lifting & Rigging ----
+    'check_suspended_load': True,      # Person under hanging/suspended load
+    # ---- Alerting ----
+    'alert_webhook_url': None,         # Slack/Teams webhook URL (optional)
+    'save_violations': True,           # Save violations to logs/violations/
+    'output_directory': str(LOGS_DIR / 'violations'),
 }
 
 # Video Processing Configuration
