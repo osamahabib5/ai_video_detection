@@ -275,6 +275,12 @@ python -m app.main path/to/video.mp4
 
 # Process RTSP stream
 python -m app.main rtsp://your-stream-url
+
+# Process YouTube video (auto-downloads)
+python -m app.main https://www.youtube.com/watch?v=VIDEO_ID
+
+# Process YouTube Shorts
+python -m app.main https://youtube.com/shorts/VIDEO_ID
 ```
 
 ### Start API Server

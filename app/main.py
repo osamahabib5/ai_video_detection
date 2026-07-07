@@ -11,6 +11,7 @@ from app.detectors.yolo_detector import ObjectDetector
 from app.video_processing.video_processor import VideoProcessor, VideoWriter
 from app.safety.compliance_checker import ComplianceChecker
 from app.safety.alert_manager import AlertManager
+from app.utils.youtube_fetcher import YouTubeFetcher
 from app.config.config import VIDEO_CONFIG, OUTPUT_CONFIG, VIDEOS_DIR, SAFETY_CONFIG
 
 
@@ -203,7 +204,19 @@ def main():
         if isinstance(source, str) and source.isdigit():
             source = int(source)
 
-        # If using a live stream (rtmp/rtsp), process indefinitely by default
+        # --- YouTube video handling ---
+        youtube_fetcher = YouTubeFetcher(output_dir=str(VIDEOS_DIR))
+        if isinstance(source, str) and youtube_fetcher.is_youtube_url(source):
+            logger.info(f"YouTube URL detected. Downloading video...")
+            downloaded = youtube_fetcher.fetch(source)
+            if downloaded:
+                source = downloaded
+                logger.info(f"YouTube video downloaded to: {source}")
+            else:
+                logger.error("Failed to download YouTube video. Exiting.")
+                sys.exit(1)
+
+        # If using a live stream (rtmp/rtsp/youtube), process indefinitely
         is_stream = isinstance(source, str) and (source.startswith("rtmp://") or source.startswith("rtsp://"))
         max_frames = None if is_stream else 200
 
