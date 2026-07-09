@@ -267,8 +267,11 @@ venv\Scripts\activate
 
 ### Run Application
 ```bash
-# Process webcam (default)
+# Process webcam (default — camera 0)
 python -m app.main
+
+# Process iPhone camera via Camo Studio (usually camera 1 or 2)
+python -m app.main 1
 
 # Process video file
 python -m app.main path/to/video.mp4
@@ -278,9 +281,16 @@ python -m app.main rtsp://your-stream-url
 
 # Process YouTube video (auto-downloads)
 python -m app.main https://www.youtube.com/watch?v=VIDEO_ID
+```
 
-# Process YouTube Shorts
-python -m app.main https://youtube.com/shorts/VIDEO_ID
+### Live iPhone Camera via Camo Studio
+```bash
+# 1. Install Camo Studio on iPhone + Windows (both connected via USB or Wi-Fi)
+# 2. Find your Camo camera index:
+python -c "import cv2; [print(f'Camera {i}: works') if cv2.VideoCapture(i).isOpened() else None for i in range(5)]"
+# 3. Run detection with live preview:
+python -m app.main 1     # replace 1 with your Camo camera index
+# 4. Press 'q' to quit, 'p' to pause/resume
 ```
 
 ### Start API Server

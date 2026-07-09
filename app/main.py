@@ -4,6 +4,7 @@ Main application entry point — Warehouse Safety Detection System
 import time
 import sys
 import os
+import cv2
 from pathlib import Path
 from app.utils.logger import Logger
 from app.utils.helpers import FrameProcessor, ResultsManager, MetricsCollector
@@ -64,9 +65,12 @@ class PredictionEngine:
         # Initialize video processor
         self.video_processor = VideoProcessor(self.detector, video_source)
         
-        # Initialize video writer if output is enabled
+        # Detect if this is a live camera (webcam, iPhone via Camo, etc.)
+        is_live = self.video_processor.is_live_camera
+        
+        # Initialize video writer only for file sources (not live cameras)
         video_writer = None
-        if OUTPUT_CONFIG['annotate_frames'] and OUTPUT_CONFIG['video_output']:
+        if not is_live and OUTPUT_CONFIG['annotate_frames'] and OUTPUT_CONFIG['video_output']:
             video_writer = VideoWriter(
                 OUTPUT_CONFIG['video_output_path'],
                 VIDEO_CONFIG['frame_rate'],
@@ -108,10 +112,17 @@ class PredictionEngine:
                         FrameProcessor.get_frame_timestamp(),
                         violations
                     )
-                    # Draw warning text on frame if violations found
                     annotated_frame = FrameProcessor.draw_violation_warnings(
                         annotated_frame, violations
                     )
+            
+            # --- Live preview window (for webcam/iPhone mode) ---
+            if hasattr(self.video_processor, 'is_live_camera') and self.video_processor.is_live_camera:
+                # Add FPS overlay
+                fps_text = f"FPS: {1.0 / max(frame_result['total_processing_time'], 0.001):.1f}"
+                cv2.putText(annotated_frame, fps_text, (10, annotated_frame.shape[0] - 10),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
+                cv2.imshow('AI Video Detection — Live', annotated_frame)
         
         try:
             # Process video (ensure detector.predict is used inside .process)
@@ -216,9 +227,16 @@ def main():
                 logger.error("Failed to download YouTube video. Exiting.")
                 sys.exit(1)
 
-        # If using a live stream (rtmp/rtsp/youtube), process indefinitely
-        is_stream = isinstance(source, str) and (source.startswith("rtmp://") or source.startswith("rtsp://"))
-        max_frames = None if is_stream else 200
+        # If using a live stream (rtmp/rtsp) or webcam, process indefinitely
+        is_live = (
+            isinstance(source, int) or
+            (isinstance(source, str) and (
+                source.startswith("rtmp://") or
+                source.startswith("rtsp://") or
+                source.isdigit()
+            ))
+        )
+        max_frames = None if is_live else 200
 
         result = engine.process_video(video_source=source, max_frames=max_frames)
         
