@@ -37,9 +37,11 @@ venv\Scripts\activate
 
 #### Step 4: Process video (choose one)
 
-**Option A: Webcam**
+**Option A: Webcam (with face enrollment)**
 ```bash
 python -m app.main
+# First launch: enrollment GUI opens → enter name → capture 3 face samples
+# Subsequent launches: automatic face identification
 ```
 
 **Option B: Video file**

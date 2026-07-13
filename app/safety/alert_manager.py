@@ -33,16 +33,20 @@ class AlertManager:
                 'timestamp': timestamp,
                 'type': v['type'],
                 'severity': v['severity'],
-                'person': v['person'],
+                'person': v.get('person', ''),
+                'person_name': v.get('person_name', 'UNKNOWN'),
+                'person_id': v.get('person_id', ''),
                 'message': v['message'],
             }
             self.violations.append(record)
             self._alert_count += 1
 
             # Print console alert for HIGH/CRITICAL violations
+            who = v.get('person_name', 'UNKNOWN')
             if v['severity'] in ('HIGH', 'CRITICAL'):
                 self.logger.warning(
-                    f"⚠️  {v['severity']} ALERT | Frame {frame_id} | {v['type']}: {v['message']}"
+                    f"⚠️  {v['severity']} | {who} | Frame {frame_id} | "
+                    f"{v['type']}: {v['message']}"
                 )
 
     def save_violations_json(self, filename='violations.json'):

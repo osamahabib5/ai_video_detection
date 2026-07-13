@@ -58,6 +58,21 @@ app/models/__init__.py                (2 lines)
 app/models/                           (Empty - for custom models)
 ```
 
+#### Safety Compliance Module
+```
+app/safety/__init__.py                (2 lines)
+app/safety/compliance_checker.py      (320 lines) Australian WHS rules — PPE, posture, plant, heights
+app/safety/alert_manager.py           (120 lines) Violation logging with person attribution + webhook
+```
+
+#### Face Identification Module
+```
+app/identification/__init__.py        (5 lines)
+app/identification/person_db.py       (190 lines) SQLite enrollment + identity matching
+app/identification/face_recognizer.py (180 lines) OpenCV DNN face detection + embedding
+app/identification/enrollment_gui.py  (160 lines) Tkinter GUI for face enrollment
+```
+
 #### Root Package
 ```
 app/__init__.py                       (10 lines) Package initialization

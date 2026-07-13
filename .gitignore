@@ -51,8 +51,14 @@ logs/
 
 # Data (keep directory structure, ignore large binary files)
 data/models/*.pt
+data/models/*.caffemodel
+data/models/*.prototxt
 data/videos/*.mp4
 data/videos/*.avi
+
+# Face identification database (contains biometric embeddings)
+data/faces.db
+data/test_faces.db
 *.db
 
 # Downloaded YOLO models (from ultralytics auto-download)
@@ -70,4 +76,3 @@ Thumbs.db
 .tmp/
 *.tmp
 *.temp
-__pycache__/

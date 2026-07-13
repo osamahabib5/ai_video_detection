@@ -58,7 +58,8 @@ Choose your path based on your role:
 ✅ **REST API** - 7 endpoints with FastAPI  
 ✅ **Configuration** - Centralized settings  
 ✅ **Logging** - Rotating file handler  
-✅ **Results Management** - JSON/CSV export  
+✅ **Facial Recognition** - OpenCV-based person identification  
+✅ **Results Management** - JSON/CSV export with person attribution  
 ✅ **Performance Metrics** - FPS, latency tracking  
 
 ### Deployment Infrastructure (9 files)
@@ -73,9 +74,15 @@ Choose your path based on your role:
 ✅ **ARCHITECTURE.md** - System design  
 ✅ **Multiple guides** - Complete reference  
 
+### Face Identification (4 files)
+✅ **person_db.py** - SQLite enrollment & matching  
+✅ **face_recognizer.py** - OpenCV face detection & embedding  
+✅ **enrollment_gui.py** - Tkinter enrollment GUI  
+✅ **Automatic attribution** - Person name + ID in violations
+
 ### Testing & Scripts (5 files)
 ✅ **Unit Tests** - Pytest coverage  
-✅ **Helper Scripts** - Model download, video generation  
+✅ **Helper Scripts** - Model download, video generation, camera diagnostic  
 ✅ **System Test** - Integrity check  
 
 ---

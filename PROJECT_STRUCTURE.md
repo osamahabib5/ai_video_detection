@@ -41,6 +41,17 @@
 │   │   ├── 📄 logger.py                  # Logging configuration & setup
 │   │   └── 📄 helpers.py                 # FrameProcessor, ResultsManager, MetricsCollector
 │   │
+│   ├── 📁 SAFETY/                        # Warehouse safety compliance
+│   │   ├── 📄 __init__.py
+│   │   ├── 📄 compliance_checker.py      # WHS rule checks
+│   │   └── 📄 alert_manager.py           # Violation logging & alerts
+│   │
+│   ├── 📁 IDENTIFICATION/                # Facial recognition
+│   │   ├── 📄 __init__.py
+│   │   ├── 📄 person_db.py               # SQLite person + embedding DB
+│   │   ├── 📄 face_recognizer.py         # OpenCV DNN face detection
+│   │   └── 📄 enrollment_gui.py          # Tkinter enrollment window
+│   │
 │   └── 📁 MODELS/                        # Custom model architectures (optional)
 │       └── 📄 __init__.py
 │
@@ -55,7 +66,12 @@
 │   ├── 📁 PREDICTIONS/                   # Detection results
 │   │   ├── detections.json               # All detections in JSON format
 │   │   ├── detections.csv                # All detections in CSV format
-│   │   └── output_video.mp4              # Annotated output video (optional)
+│   │   ├── objects_detected.csv          # Unique object classes summary
+│   │   └── output_result.avi             # Annotated output video
+│   │
+│   ├── 📁 VIOLATIONS/                    # Safety violation records
+│   │   ├── violations.json               # All violations (with person attribution)
+│   │   └── violations.csv                # CSV format for export/audit
 │   │
 │   └── app.log                           # Application logs (rotating)
 │

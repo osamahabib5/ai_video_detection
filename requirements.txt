@@ -12,6 +12,9 @@ opencv-python-headless>=4.8.1.78
 # YouTube / Streaming
 yt-dlp>=2024.12.0
 
+# Face Identification (OpenCV-based, no dlib)
+Pillow>=10.1.0  # already included above, used for tkinter GUI
+
 # Data Processing
 numpy>=1.24.3
 pandas>=2.1.3

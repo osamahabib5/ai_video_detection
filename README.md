@@ -6,18 +6,10 @@ Real-time warehouse safety compliance monitoring using YOLO-World. Detects PPE v
 
 This system:
 - **Detects workers, PPE, and equipment** in warehouse video feeds
+- **Identifies individuals** via facial recognition — violations attributed to specific persons
 - **Checks compliance** — hardhat, safety vest, safe lifting posture
 - **Generates alerts** for violations (console, JSON, CSV, webhook)
-- **Saves results** in JSON/CSV format
-- **Runs in a Python virtual environment** for easy deployment
-
-## Overview
-
-This is a production-ready ML system that:
-- **Processes live video feeds** from webcams or video files
-- **Detects objects** using YOLOv8 neural network
-- **Generates predictions** with bounding boxes and confidence scores
-- **Saves results** in JSON/CSV format
+- **Saves results** in JSON/CSV format with person attribution
 - **Runs in a Python virtual environment** for easy deployment
 
 ## Project Structure
@@ -42,6 +34,11 @@ ai_video_detection/
 │   │   ├── __init__.py
 │   │   ├── compliance_checker.py  # PPE & posture rule checks
 │   │   └── alert_manager.py       # Violation logging & alerts
+│   ├── identification/        # Facial recognition & person attribution
+│   │   ├── __init__.py
+│   │   ├── person_db.py           # SQLite person + embedding store
+│   │   ├── face_recognizer.py     # OpenCV face detection & matching
+│   │   └── enrollment_gui.py      # Tkinter GUI for enrolling faces
 │   └── utils/
 │       ├── __init__.py
 │       ├── logger.py          # Logging utilities
@@ -67,7 +64,9 @@ ai_video_detection/
 - ✅ PPE compliance: hardhat/helmet + safety vest checks
 - ✅ Unsafe lifting posture detection (with YOLOv8-pose)
 - ✅ Automatic violation alerts (console, JSON, CSV, webhook-ready)
-- ✅ Frame annotation with bounding boxes + violation warnings
+- ✅ Facial recognition — identify workers & attribute violations to individuals
+- ✅ Automatic enrollment GUI — capture faces on first launch
+- ✅ Frame annotation with bounding boxes + violation warnings + face overlays
 - ✅ Performance metrics and logging
 - ✅ Python virtual environment (venv) isolation
 
@@ -223,6 +222,22 @@ SAFETY_CONFIG = {
 }
 ```
 
+### Face Identification Configuration
+```python
+IDENTIFICATION_CONFIG = {
+    'enabled': True,                     # Enable facial recognition
+    'db_path': 'data/faces.db',          # SQLite database of enrolled faces
+    'face_check_interval': 5,            # Check face every N frames (performance)
+    'match_threshold': 0.55,             # Cosine similarity threshold (0.0-1.0)
+    'auto_enroll_on_start': True,        # Launch enrollment GUI if no persons enrolled
+    'highlight_face': True,              # Draw rectangle around recognized face
+}
+```
+
+> **🔍 First launch**: If no faces are enrolled, a Tkinter GUI opens automatically.
+> Enter a name, look at the camera, and capture 3 face samples.
+> All subsequent runs will automatically identify the person.
+
 ### Output Configuration
 ```python
 OUTPUT_CONFIG = {
@@ -327,6 +342,13 @@ After processing, outputs are saved in `logs/predictions/`:
     "detection_count": 1
   }
 ]
+```
+
+### violations.csv (with person attribution)
+```
+frame_id,timestamp,type,severity,person,person_name,person_id,message
+42,2026-07-12T10:30:45,NO_HARDHAT,HIGH,person@320,240,John Smith,1,WHS §9: Person without hardhat
+58,2026-07-12T10:30:52,NO_VEST,MEDIUM,person@500,300,UNKNOWN_PERSON,,WHS §9: Person without vest
 ```
 
 ### detections.csv

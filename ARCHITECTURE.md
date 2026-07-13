@@ -66,8 +66,27 @@ The AI Video Detection System is a production-ready ML pipeline for real-time ob
 │              Output Layer                           │
 │  - Video files (annotated)                         │
 │  - JSON results                                    │
-│  - CSV exports                                     │
+│  - Safety violation logs                           │
 │  - Application logs                                │
+└─────────────────────────────────────────────────────┘
+           │
+           ▼
+┌─────────────────────────────────────────────────────┐
+│              Safety & Identification Layer          │
+│  ComplianceChecker:                                 │
+│    - PPE checks (hardhat, vest, gloves, boots)     │
+│    - Manual handling posture (lifting, twisting)   │
+│    - Plant exclusion zones (forklift proximity)    │
+│    - Working at heights (edge detection)           │
+│    - Suspended loads (person under load)           │
+│  FaceRecognizer:                                    │
+│    - Face detection (OpenCV DNN SSD)               │
+│    - Embedding extraction (HOG descriptor)         │
+│    - Person identification (cosine similarity)     │
+│  AlertManager:                                      │
+│    - Violation logging (JSON/CSV)                  │
+│    - Person attribution (name + ID)                │
+│    - Webhook alerts (Slack/Teams)                  │
 └─────────────────────────────────────────────────────┘
 ```
 
@@ -90,7 +109,13 @@ Input Frame
     ↓
 [Results Storage] → Save to JSON/CSV
     ↓
-[Output] → Annotated frame + Detection data
+[FaceIdentification] → Identify person (every Nth frame)
+    ↓
+[ComplianceChecker] → Check WHS rules
+    ↓
+[AlertManager] → Log violations with person attribution
+    ↓
+[Output] → Annotated frame + Detection data + Violation report
 ```
 
 ## Component Details
@@ -195,8 +220,15 @@ Output: List of detections per frame
 - **Uvicorn**: ASGI server
 - **Pydantic**: Data validation
 
+### Safety & Identification
+- **ComplianceChecker**: Australian WHS rules engine
+- **AlertManager**: Violation logging + alerts with person attribution
+- **FaceRecognizer**: OpenCV DNN face detection + embedding matching
+- **PersonDB**: SQLite enrollment & identification store
+
 ### Infrastructure
 - **venv**: Python virtual environment isolation
+- **SQLite**: Embedded person database (zero setup)
 
 ### Data Processing
 - **NumPy**: Numerical computing

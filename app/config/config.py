@@ -112,3 +112,14 @@ PERFORMANCE_CONFIG = {
     'half_precision': False,
     'workers': 4,
 }
+
+# Face Identification Configuration
+IDENTIFICATION_CONFIG = {
+    'enabled': True,                     # Enable face identification
+    'db_path': str(DATA_DIR / 'faces.db'), # SQLite database file
+    'face_check_interval': 5,            # Check face every N frames (performance)
+    'match_threshold': 0.55,             # Cosine similarity threshold (0-1)
+    'auto_enroll_on_start': True,        # Prompt enrollment GUI if no persons in DB
+    'camera_index': 0,                   # Camera to use for enrollment (same as detection)
+    'highlight_face': True,              # Draw rectangle around recognized face
+}

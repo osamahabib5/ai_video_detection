@@ -13,7 +13,12 @@ from app.video_processing.video_processor import VideoProcessor, VideoWriter
 from app.safety.compliance_checker import ComplianceChecker
 from app.safety.alert_manager import AlertManager
 from app.utils.youtube_fetcher import YouTubeFetcher
-from app.config.config import VIDEO_CONFIG, OUTPUT_CONFIG, VIDEOS_DIR, SAFETY_CONFIG
+from app.identification.person_db import PersonDB
+from app.identification.face_recognizer import FaceRecognizer
+from app.identification.enrollment_gui import EnrollmentGUI
+from app.config.config import (
+    VIDEO_CONFIG, OUTPUT_CONFIG, VIDEOS_DIR, SAFETY_CONFIG, IDENTIFICATION_CONFIG,
+)
 
 
 class PredictionEngine:
@@ -53,6 +58,37 @@ class PredictionEngine:
             self.logger.info("Safety compliance monitoring ENABLED")
         else:
             self.logger.info("Safety compliance monitoring DISABLED")
+
+        # Initialize face identification (if enabled)
+        self.face_recognizer = None
+        self.person_db = None
+        self._current_person_id = None
+        self._current_person_name = 'UNKNOWN'
+        self._face_check_counter = 0
+        self._face_interval = IDENTIFICATION_CONFIG.get('face_check_interval', 5)
+        self._unknown_face_streak = 0         # consecutive unknown face checks
+        self._unknown_enroll_offered = False  # only prompt once per session
+        self._unknown_prompt_threshold = 10   # face checks before prompting (~5 sec at 2 FPS)
+
+        if IDENTIFICATION_CONFIG.get('enabled', False):
+            self.person_db = PersonDB(db_path=IDENTIFICATION_CONFIG.get('db_path', 'data/faces.db'))
+            self.face_recognizer = FaceRecognizer(self.person_db)
+            enrolled = self.person_db.count_enrolled()
+            self.logger.info(f"Face identification ENABLED ({enrolled} persons enrolled)")
+
+            # Auto-enroll if no one is enrolled
+            if enrolled == 0 and IDENTIFICATION_CONFIG.get('auto_enroll_on_start', True):
+                cam_idx = IDENTIFICATION_CONFIG.get('camera_index', 0)
+                self.logger.info("No enrolled persons — launching enrollment GUI...")
+                gui = EnrollmentGUI(self.face_recognizer, self.person_db, camera_index=cam_idx)
+                gui.start()
+                enrolled = self.person_db.count_enrolled()
+                if enrolled > 0:
+                    self.logger.info(f"Enrollment complete: {enrolled} person(s) now in database")
+                else:
+                    self.logger.warning("No persons enrolled — face ID will skip")
+        else:
+            self.logger.info("Face identification DISABLED")
         
         self.logger.info("Prediction Engine initialized successfully")
     
@@ -101,12 +137,72 @@ class PredictionEngine:
             # Track metrics
             self.metrics_collector.add_frame_time(frame_result['total_processing_time'])
             self.metrics_collector.add_inference_time(frame_result['inference_time'])
-            
+
+            # --- Face identification (every Nth frame) ---
+            if self.face_recognizer is not None:
+                self._face_check_counter += 1
+                if self._face_check_counter >= self._face_interval:
+                    self._face_check_counter = 0
+                    pid, pname, pconf, face_bbox = self.face_recognizer.identify(frame)
+                    if pname not in ('NO_FACE_DETECTED', 'NOT_ENROLLED'):
+                        self._current_person_id = pid
+                        self._current_person_name = pname
+                        self._unknown_face_streak = 0  # reset — known person
+                    elif pname == 'NO_FACE_DETECTED':
+                        self._current_person_name = 'NO_FACE'
+                        self._unknown_face_streak = 0
+                    elif pname == 'UNKNOWN_PERSON':
+                        self._current_person_name = 'UNKNOWN_PERSON'
+                        self._unknown_face_streak += 1
+                        # --- Prompt to enroll unknown face ---
+                        if (self._unknown_face_streak >= self._unknown_prompt_threshold
+                                and not self._unknown_enroll_offered
+                                and self.person_db.count_enrolled() > 0):
+                            self._unknown_enroll_offered = True
+                            # Pause processing briefly and show dialog
+                            import tkinter.messagebox as tkmb
+                            enroll = tkmb.askyesno(
+                                "Unknown Face Detected",
+                                "A face has been detected that doesn't match any "
+                                "enrolled person.\n\n"
+                                "Would you like to enroll this person now?\n\n"
+                                "Click 'Yes' to open the enrollment window.\n"
+                                "Click 'No' to continue — they will be labeled as 'UNKNOWN_PERSON'."
+                            )
+                            if enroll:
+                                self._unknown_face_streak = 0
+                                self._unknown_enroll_offered = False
+                                cam_idx = IDENTIFICATION_CONFIG.get('camera_index',
+                                    int(self.video_processor.source) if isinstance(self.video_processor.source, (int, str)) and str(self.video_processor.source).isdigit() else 0)
+                                gui = EnrollmentGUI(self.face_recognizer, self.person_db, camera_index=cam_idx)
+                                gui.start()
+                                self.logger.info("Enrollment dialog closed — resuming monitoring")
+                            else:
+                                self.logger.info("Unknown person enrollment declined — labeling as UNKNOWN_PERSON")
+
+                    # Draw face box if identified
+                    if face_bbox and IDENTIFICATION_CONFIG.get('highlight_face', True):
+                        x, y, w, h = face_bbox
+                        if pname == 'UNKNOWN_PERSON':
+                            color = (0, 165, 255)  # orange
+                        elif pname in ('NO_FACE_DETECTED',):
+                            color = (0, 0, 255)     # red
+                        else:
+                            color = (0, 255, 0)      # green — known person
+                        cv2.rectangle(annotated_frame, (x, y), (x + w, y + h), color, 2)
+                        label = f"{pname} ({pconf:.2f})" if pconf > 0 else pname
+                        cv2.putText(annotated_frame, label, (x, y - 10),
+                                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+
             # --- Safety compliance check ---
             if self.compliance_checker and detections:
                 violations = self.compliance_checker.check_frame(
                     detections, frame_shape=frame.shape[:2])
                 if violations:
+                    # Attach person identity to each violation
+                    for v in violations:
+                        v['person_name'] = self._current_person_name
+                        v['person_id'] = self._current_person_id or ''
                     self.alert_manager.add_violations(
                         frame_result['frame_id'],
                         FrameProcessor.get_frame_timestamp(),
